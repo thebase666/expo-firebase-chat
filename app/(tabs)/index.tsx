@@ -132,7 +132,10 @@ export default function HomeScreen() {
         setRegisteredUsers(list);
       } catch (error) {
         console.error("Error fetching users:", error);
-        Alert.alert("错误", "无法加载用户列表，请检查网络或 Firestore 权限");
+        Alert.alert(
+          "Error",
+          "Unable to load the user list. Please check your network connection or Firestore permissions.",
+        );
       } finally {
         setUsersLoading(false);
       }
@@ -141,7 +144,7 @@ export default function HomeScreen() {
     void loadUsers();
   }, [user?.uid, usersModalVisible]);
 
-  // 实时加载：直接读取冗余后的 chats 列表（不再拼装 messages/user）
+  // Real-time loading: read the redundant chats list directly (no longer assembling messages/user)
   useEffect(() => {
     if (!user?.uid) {
       setRooms([]);
@@ -188,7 +191,10 @@ export default function HomeScreen() {
       },
       (error) => {
         console.error("Listen chats error:", error);
-        Alert.alert("错误", "无法实时加载聊天列表，请检查 Firestore 权限");
+        Alert.alert(
+          "Error",
+          "Unable to load the chat list in real time. Please check your Firestore permissions.",
+        );
         setRoomsLoading(false);
       },
     );
@@ -198,7 +204,7 @@ export default function HomeScreen() {
 
   const handleOpenUsers = () => {
     if (!user?.uid) {
-      Alert.alert("提示", "请先登录");
+      Alert.alert("Notice", "Please log in first");
       return;
     }
     setUsersModalVisible(true);
@@ -209,11 +215,11 @@ export default function HomeScreen() {
     const roomId = createRoomId(user.uid, targetUser.uid);
     setUsersModalVisible(false);
     router.push({
-      pathname: "/chat/[roomId]",
+      pathname: "/chat/[id]",
       params: {
-        roomId,
-        peerUid: targetUser.uid,
-        peerName: targetUser.nickname,
+        id: roomId,
+        targetUserUid: targetUser.uid,
+        targetUserName: targetUser.nickname,
       },
     });
   };
@@ -223,14 +229,14 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Chats</Text>
         <TouchableOpacity style={styles.openButton} onPress={handleOpenUsers}>
-          <Text style={styles.openButtonText}>新建聊天</Text>
+          <Text style={styles.openButtonText}>New Chat</Text>
         </TouchableOpacity>
       </View>
 
       {roomsLoading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#007AFF" />
-          <Text style={styles.loadingText}>加载房间...</Text>
+          <Text style={styles.loadingText}>Loading rooms...</Text>
         </View>
       ) : (
         <FlatList
@@ -239,9 +245,9 @@ export default function HomeScreen() {
           contentContainerStyle={styles.roomsListContent}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>暂无聊天房间</Text>
+              <Text style={styles.emptyText}>No chat rooms available</Text>
               <Text style={styles.emptySubtext}>
-                点击右上角「新建聊天」开始
+                Tap the top-right &quot;New Chat&quot; to get started
               </Text>
             </View>
           }
@@ -251,7 +257,7 @@ export default function HomeScreen() {
               item.avatar && item.avatar.length > 0
                 ? item.avatar
                 : PLACEHOLDER_AVATAR;
-            const lastText = item.lastMessageText ?? "暂无消息";
+            const lastText = item.lastMessageText ?? "No messages";
             const lastTime = formatChatTime(item.updatedAt);
 
             return (
@@ -259,11 +265,11 @@ export default function HomeScreen() {
                 style={styles.roomRow}
                 onPress={() => {
                   router.push({
-                    pathname: "/chat/[roomId]",
+                    pathname: "/chat/[id]",
                     params: {
-                      roomId: item.chatId,
-                      peerUid: item.otherUid,
-                      peerName: name,
+                      id: item.chatId,
+                      targetUserUid: item.otherUid,
+                      targetUserName: name,
                     },
                   });
                 }}
@@ -300,18 +306,18 @@ export default function HomeScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>注册用户</Text>
+              <Text style={styles.modalTitle}>Registered Users</Text>
               <TouchableOpacity
                 onPress={() => setUsersModalVisible(false)}
                 hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               >
-                <Text style={styles.modalClose}>关闭</Text>
+                <Text style={styles.modalClose}>Close</Text>
               </TouchableOpacity>
             </View>
             {usersLoading ? (
               <View style={styles.modalLoading}>
                 <ActivityIndicator size="large" color="#007AFF" />
-                <Text style={styles.modalLoadingText}>加载中...</Text>
+                <Text style={styles.modalLoadingText}>Loading...</Text>
               </View>
             ) : (
               <FlatList
@@ -319,7 +325,9 @@ export default function HomeScreen() {
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.usersListContent}
                 ListEmptyComponent={
-                  <Text style={styles.usersEmpty}>暂无可聊天用户</Text>
+                  <Text style={styles.usersEmpty}>
+                    No available users to chat with
+                  </Text>
                 }
                 renderItem={({ item }) => {
                   const uri =

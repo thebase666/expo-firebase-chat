@@ -37,6 +37,7 @@ function RootLayoutNav() {
             name="modal"
             options={{ presentation: "modal", title: "Modal" }}
           />
+          <Stack.Screen name="chat/[id]" options={{ headerShown: false }} />
         </Stack.Protected>
 
         <Stack.Protected guard={!user}>
